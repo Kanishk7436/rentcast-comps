@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 from typing import List
 
-from flask import Flask, abort, render_template, request, send_from_directory
+from flask import Flask, abort, make_response, render_template, request, send_from_directory
 
 from main import (
     DEFAULT_BATHROOMS,
@@ -15,6 +15,36 @@ from main import (
 
 app = Flask(__name__)
 OUTPUT_DIR = os.path.join(os.getcwd(), "output")
+APP_USERNAME = os.getenv("APP_USERNAME", "").strip()
+APP_PASSWORD = os.getenv("APP_PASSWORD", "").strip()
+PROTECT_APP = bool(APP_USERNAME and APP_PASSWORD)
+
+
+def _unauthorized():
+    return make_response(
+        "Authentication required",
+        401,
+        {"WWW-Authenticate": 'Basic realm="RentCast Comps"'},
+    )
+
+
+@app.before_request
+def protect_app():
+    if not PROTECT_APP:
+        return None
+    if request.endpoint in {"static", "health"}:
+        return None
+
+    auth = request.authorization
+    if not auth or auth.username != APP_USERNAME or auth.password != APP_PASSWORD:
+        return _unauthorized()
+
+    return None
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 
 def parse_list(value: str) -> List[str]:
@@ -65,13 +95,13 @@ def run():
 
         results = {
             "row_count": len(df),
-                "filename": filename,
-                "table_html": table_html,
-                "zips": ", ".join(zips),
-                "property_types": ", ".join(property_types),
-                "bedrooms": bedrooms,
-                "bathrooms": bathrooms,
-            }
+            "filename": filename,
+            "table_html": table_html,
+            "zips": ", ".join(zips),
+            "property_types": ", ".join(property_types),
+            "bedrooms": bedrooms,
+            "bathrooms": bathrooms,
+        }
 
         return render_template(
             "index.html",
@@ -100,6 +130,7 @@ def run():
 
 @app.get("/download/<path:filename>")
 def download(filename: str):
+    filename = os.path.basename(filename)
     full_path = os.path.join(OUTPUT_DIR, filename)
     if not os.path.isfile(full_path):
         abort(404)
