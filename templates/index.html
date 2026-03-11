@@ -13,9 +13,8 @@
           <div class="eyebrow">Rental comps dashboard</div>
           <h1>RentCast Rental Comps Extractor</h1>
           <p class="subhead">
-            Enter ZIP codes, bedrooms, and optional bathrooms. Pull either active rental
-            listings or sales data from RentCast and download in the same CSV format:
-            Bedrooms, Bathrooms, Square Footage, Address, Sale Price.
+            Enter ZIP codes, bedrooms, and optional bathrooms. Pull active rental
+            listings, sales data, or both.
           </p>
         </div>
         <div class="card">
@@ -23,14 +22,19 @@
             <fieldset>
               <legend>Data mode</legend>
               <label class="check">
-                <input type="radio" name="query_type" value="sales"
-                  {% if defaults.query_type != 'listings' %}checked{% endif %} />
+                <input type="radio" name="query_scope" value="sales"
+                  {% if defaults.query_scope == 'sales' or defaults.query_scope == 'both' and not results %}checked{% endif %} />
                 Sales (last N days)
               </label>
               <label class="check">
-                <input type="radio" name="query_type" value="listings"
-                  {% if defaults.query_type == 'listings' %}checked{% endif %} />
+                <input type="radio" name="query_scope" value="listings"
+                  {% if defaults.query_scope == 'listings' %}checked{% endif %} />
                 Active Rental Listings
+              </label>
+              <label class="check">
+                <input type="radio" name="query_scope" value="both"
+                  {% if defaults.query_scope == 'both' %}checked{% endif %} />
+                Both Sales + Listings
               </label>
             </fieldset>
 
@@ -69,24 +73,22 @@
 
       {% if results %}
       <section class="results">
+        {% for result in results %}
         <div class="results-header">
           <div>
-              <h2>Results</h2>
+              <h2>{{ result.dataset_label }}</h2>
               <p>
-              {{ results.row_count }} rows. ZIPs: {{ results.zips }}. Types: {{ results.property_types }}.
-              Mode: {% if results.query_type == 'sales' %}Sales{% else %}Active Listings{% endif %}.
-              {% if results.query_type == 'sales' %}
-              Last {{ results.lookback_days }} days.
-              {% endif %}
-              Bedrooms: {{ results.bedrooms }}. Bathrooms: {{ results.bathrooms or 'Any' }}.
-            </p>
+              {{ result.row_count }} rows. ZIPs: {{ result.zips }}. Types: {{ result.property_types }}.
+              Bedrooms: {{ result.bedrooms }}. Bathrooms: {{ result.bathrooms or 'Any' }}.
+              </p>
           </div>
-          <a class="button" href="/download/{{ results.download_token or results.filename }}">Download CSV</a>
+          <a class="button" href="/download/{{ result.download_token }}">Download CSV</a>
         </div>
         <div class="table-wrap">
-          {{ results.table_html | safe }}
+          {{ result.table_html | safe }}
         </div>
         <div class="note">Showing first 200 rows.</div>
+        {% endfor %}
       </section>
       {% endif %}
     </div>

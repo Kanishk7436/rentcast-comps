@@ -327,7 +327,7 @@ def run_mls_active_listings(
     target_bathrooms: Optional[str] = DEFAULT_BATHROOMS,
     out_path: str = "output/rentcast_mls_listings.csv",
 ) -> pd.DataFrame:
-    """Fetch active long-term rental listings and export full RentCast MLS payload."""
+    """Fetch active long-term rental listings and export the rent comps format."""
     load_dotenv()
     os.makedirs("output", exist_ok=True)
 
@@ -364,30 +364,83 @@ def run_mls_active_listings(
 
     if not deduped_records:
         df = pd.DataFrame(
-            columns=["Bedrooms", "Bathrooms", "Square Footage", "Address", "Sale Price"]
+            columns=[
+                "address",
+                "year_built",
+                "home_sqft",
+                "bedrooms",
+                "bathrooms",
+                "garage_spaces",
+                "asking_rent",
+                "rent_per_sqft",
+                "furnished",
+                "pool",
+                "lot_sqft",
+                "status",
+                "days_on_market",
+                "last_seen_date",
+                "listing_id",
+                "zipCode",
+                "city",
+                "state",
+                "propertyType",
+            ]
         )
         df.to_csv(out_path, index=False)
         print(f"Saved: {out_path} (0 rows)")
         return df
 
+    # Keep enrichment bounded to avoid too many lookup calls.
+    max_enrich = min(len(deduped_records), 15)
     rows: List[Dict[str, Any]] = []
-    for record in deduped_records:
+    for idx, record in enumerate(deduped_records):
         address = first_present(record, "formattedAddress", "address", "addressLine1")
-        sale_price = first_present(record, "price", "askingPrice")
-        if not address or sale_price is None:
+        if not address:
             continue
 
-        rows.append(
-            {
-                "Bedrooms": first_present(record, "bedrooms", "beds"),
-                "Bathrooms": first_present(record, "bathrooms", "baths"),
-                "Square Footage": first_present(record, "squareFootage", "sqft"),
-                "Address": address,
-                "Sale Price": sale_price,
-            }
-        )
+        prop = None
+        if idx < max_enrich:
+            try:
+                prop = property_lookup_by_address(address)
+            except Exception:
+                prop = None
 
-    df = pd.DataFrame(rows, columns=["Bedrooms", "Bathrooms", "Square Footage", "Address", "Sale Price"])
+        row = extract_fields(record, prop)
+        if not row.get("asking_rent"):
+            row["asking_rent"] = first_present(record, "price", "askingPrice")
+        if row["rent_per_sqft"] is None and row["asking_rent"] and row["home_sqft"]:
+            try:
+                row["rent_per_sqft"] = round(float(row["asking_rent"]) / float(row["home_sqft"]), 4)
+            except Exception:
+                pass
+
+        if not row.get("address"):
+            row["address"] = address
+
+        rows.append(row)
+
+    columns = [
+        "address",
+        "year_built",
+        "home_sqft",
+        "bedrooms",
+        "bathrooms",
+        "garage_spaces",
+        "asking_rent",
+        "rent_per_sqft",
+        "furnished",
+        "pool",
+        "lot_sqft",
+        "status",
+        "days_on_market",
+        "last_seen_date",
+        "listing_id",
+        "zipCode",
+        "city",
+        "state",
+        "propertyType",
+    ]
+    df = pd.DataFrame(rows, columns=columns)
     if df.empty:
         df.to_csv(out_path, index=False)
         print(f"Saved: {out_path} ({len(df)} rows)")

@@ -21,6 +21,7 @@ APP_USERNAME = os.getenv("APP_USERNAME", "").strip()
 APP_PASSWORD = os.getenv("APP_PASSWORD", "").strip()
 PROTECT_APP = bool(APP_USERNAME and APP_PASSWORD)
 EXPORTS: dict[str, bytes] = {}
+EXPORT_META: dict[str, str] = {}
 
 
 def _unauthorized():
@@ -67,12 +68,45 @@ def index():
             "property_types": DEFAULT_PROPERTY_TYPES,
             "bedrooms": DEFAULT_BEDROOMS,
             "bathrooms": DEFAULT_BATHROOMS,
-            "query_type": "sales",
+            "query_scope": "sales",
             "lookback_days": "365",
         },
         results=None,
         error=None,
     )
+
+
+def _build_result_payload(
+    df,
+    dataset_name: str,
+    dataset_label: str,
+    query_scope: str,
+    zips,
+    property_types,
+    bedrooms: str,
+    bathrooms: str,
+    out_path: str,
+):
+    table_html = df.head(200).to_html(index=False, classes="table")
+    csv_bytes = df.to_csv(index=False).encode("utf-8")
+    download_token = uuid.uuid4().hex
+    EXPORTS[download_token] = csv_bytes
+    filename = os.path.basename(out_path).replace(".csv", ".csv")
+    EXPORT_META[download_token] = filename
+
+    return {
+        "row_count": len(df),
+        "filename": os.path.basename(out_path),
+        "download_token": download_token,
+        "table_html": table_html,
+        "zips": ", ".join(zips),
+        "property_types": ", ".join(property_types),
+        "bedrooms": bedrooms,
+        "bathrooms": bathrooms,
+        "query_scope": query_scope,
+        "dataset_name": dataset_name,
+        "dataset_label": dataset_label,
+    }
 
 
 @app.post("/run")
@@ -82,18 +116,22 @@ def run():
         property_types = ["Single Family"]
         bedrooms = request.form.get("bedrooms", DEFAULT_BEDROOMS).strip() or DEFAULT_BEDROOMS
         bathrooms = request.form.get("bathrooms", DEFAULT_BATHROOMS).strip() or DEFAULT_BATHROOMS
-        query_type = request.form.get("query_type", "sales").strip() or "sales"
+        query_scope = request.form.get("query_scope", "sales").strip() or "sales"
         lookback_days = request.form.get("lookback_days", "365").strip()
         lookback_days = int(lookback_days) if lookback_days.isdigit() else 365
 
-        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        suffix = uuid.uuid4().hex[:6]
-        filename_prefix = "rentcast_sales" if query_type == "sales" else "rentcast_listings"
-        filename = f"{filename_prefix}_{ts}_{suffix}.csv"
-        out_path = os.path.join("output", filename)
+        selected_scope = {"sales", "listings", "both"}
+        if query_scope not in selected_scope:
+            query_scope = "sales"
 
-        if query_type == "sales":
-            df = run_sales_properties_last_12_months(
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        run_token = uuid.uuid4().hex[:6]
+        results = []
+        scopes_to_run = [query_scope] if query_scope != "both" else ["sales", "listings"]
+
+        if "sales" in scopes_to_run:
+            out_path = os.path.join("output", f"rentcast_sales_{ts}_{run_token}_sales.csv")
+            df_sales = run_sales_properties_last_12_months(
                 target_zips=zips,
                 target_property_types=property_types,
                 target_bedrooms=bedrooms,
@@ -101,32 +139,42 @@ def run():
                 lookback_days=lookback_days,
                 out_path=out_path,
             )
-        else:
-            df = run_mls_active_listings(
+            results.append(
+                _build_result_payload(
+                    df_sales,
+                    "sales",
+                    f"Sales (last {lookback_days} days)",
+                    query_scope,
+                    zips,
+                    property_types,
+                    bedrooms,
+                    bathrooms,
+                    out_path,
+                )
+            )
+
+        if "listings" in scopes_to_run:
+            out_path = os.path.join("output", f"rentcast_listings_{ts}_{run_token}_listings.csv")
+            df_listings = run_mls_active_listings(
                 target_zips=zips,
                 target_property_types=property_types,
                 target_bedrooms=bedrooms,
                 target_bathrooms=bathrooms,
                 out_path=out_path,
             )
-
-        table_html = df.head(200).to_html(index=False, classes="table")
-        csv_bytes = df.to_csv(index=False).encode("utf-8")
-        download_token = uuid.uuid4().hex
-        EXPORTS[download_token] = csv_bytes
-
-        results = {
-            "row_count": len(df),
-            "filename": filename,
-            "download_token": download_token,
-            "table_html": table_html,
-            "zips": ", ".join(zips),
-            "property_types": ", ".join(property_types),
-            "bedrooms": bedrooms,
-            "bathrooms": bathrooms,
-            "query_type": query_type,
-            "lookback_days": str(lookback_days),
-        }
+            results.append(
+                _build_result_payload(
+                    df_listings,
+                    "listings",
+                    "Active Rental Listings",
+                    query_scope,
+                    zips,
+                    property_types,
+                    bedrooms,
+                    bathrooms,
+                    out_path,
+                )
+            )
 
         return render_template(
             "index.html",
@@ -135,7 +183,7 @@ def run():
                 "property_types": property_types,
                 "bedrooms": bedrooms,
                 "bathrooms": bathrooms,
-                "query_type": query_type,
+                "query_scope": query_scope,
                 "lookback_days": str(lookback_days),
             },
             results=results,
@@ -149,7 +197,7 @@ def run():
                 "property_types": DEFAULT_PROPERTY_TYPES,
                 "bedrooms": DEFAULT_BEDROOMS,
                 "bathrooms": DEFAULT_BATHROOMS,
-                "query_type": "sales",
+                "query_scope": "sales",
                 "lookback_days": "365",
             },
             results=None,
@@ -160,12 +208,13 @@ def run():
 @app.get("/download/<string:token>")
 def download(token: str):
     csv_bytes = EXPORTS.get(token)
+    download_name = EXPORT_META.get(token, "rentcast_comps.csv")
     if csv_bytes:
         return send_file(
             io.BytesIO(csv_bytes),
             mimetype="text/csv",
             as_attachment=True,
-            download_name="rentcast_comps.csv",
+            download_name=download_name,
         )
 
     token_filename = os.path.basename(token)
