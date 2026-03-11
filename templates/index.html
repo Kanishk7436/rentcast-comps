@@ -58,7 +58,7 @@
               Bedrooms: {{ results.bedrooms }}. Bathrooms: {{ results.bathrooms or 'Any' }}.
             </p>
           </div>
-          <a class="button" href="/download/{{ results.filename }}">Download CSV</a>
+          <a class="button" href="/download/{{ results.download_token or results.filename }}">Download CSV</a>
         </div>
         <div class="table-wrap">
           {{ results.table_html | safe }}

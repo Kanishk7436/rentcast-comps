@@ -1,9 +1,10 @@
 import os
+import io
 import uuid
 from datetime import datetime
 from typing import List
 
-from flask import Flask, abort, make_response, render_template, request, send_from_directory
+from flask import Flask, abort, make_response, render_template, request, send_file
 
 from main import (
     DEFAULT_BATHROOMS,
@@ -18,6 +19,7 @@ OUTPUT_DIR = os.path.join(os.getcwd(), "output")
 APP_USERNAME = os.getenv("APP_USERNAME", "").strip()
 APP_PASSWORD = os.getenv("APP_PASSWORD", "").strip()
 PROTECT_APP = bool(APP_USERNAME and APP_PASSWORD)
+EXPORTS: dict[str, bytes] = {}
 
 
 def _unauthorized():
@@ -92,10 +94,14 @@ def run():
         )
 
         table_html = df.head(200).to_html(index=False, classes="table")
+        csv_bytes = df.to_csv(index=False).encode("utf-8")
+        download_token = uuid.uuid4().hex
+        EXPORTS[download_token] = csv_bytes
 
         results = {
             "row_count": len(df),
             "filename": filename,
+            "download_token": download_token,
             "table_html": table_html,
             "zips": ", ".join(zips),
             "property_types": ", ".join(property_types),
@@ -128,13 +134,29 @@ def run():
         )
 
 
-@app.get("/download/<path:filename>")
-def download(filename: str):
-    filename = os.path.basename(filename)
-    full_path = os.path.join(OUTPUT_DIR, filename)
-    if not os.path.isfile(full_path):
-        abort(404)
-    return send_from_directory(OUTPUT_DIR, filename, as_attachment=True)
+@app.get("/download/<string:token>")
+def download(token: str):
+    csv_bytes = EXPORTS.get(token)
+    if csv_bytes:
+        return send_file(
+            io.BytesIO(csv_bytes),
+            mimetype="text/csv",
+            as_attachment=True,
+            download_name="rentcast_comps.csv",
+        )
+
+    token_filename = os.path.basename(token)
+    full_path = os.path.join(OUTPUT_DIR, token_filename)
+    if os.path.isfile(full_path):
+        with open(full_path, "rb") as f:
+            return send_file(
+                io.BytesIO(f.read()),
+                mimetype="text/csv",
+                as_attachment=True,
+                download_name=token_filename,
+            )
+
+    abort(404)
 
 
 if __name__ == "__main__":
