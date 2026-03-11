@@ -13,12 +13,27 @@
           <div class="eyebrow">Rental comps dashboard</div>
           <h1>RentCast Rental Comps Extractor</h1>
           <p class="subhead">
-            Enter ZIP codes, bedrooms, and optional bathrooms. The app pulls active MLS
-            listings from RentCast and returns the full listing payload for download.
+            Enter ZIP codes, bedrooms, and optional bathrooms. Pull either active rental
+            listings or sales data from RentCast and download in the same CSV format:
+            Bedrooms, Bathrooms, Square Footage, Address, Sale Price.
           </p>
         </div>
         <div class="card">
           <form method="post" action="/run">
+            <fieldset>
+              <legend>Data mode</legend>
+              <label class="check">
+                <input type="radio" name="query_type" value="sales"
+                  {% if defaults.query_type != 'listings' %}checked{% endif %} />
+                Sales (last N days)
+              </label>
+              <label class="check">
+                <input type="radio" name="query_type" value="listings"
+                  {% if defaults.query_type == 'listings' %}checked{% endif %} />
+                Active Rental Listings
+              </label>
+            </fieldset>
+
             <label>
               ZIP codes (comma‑separated)
               <textarea name="zips" rows="2">{{ defaults.zips }}</textarea>
@@ -32,6 +47,10 @@
               <label>
                 Bathrooms
                 <input type="text" name="bathrooms" value="{{ defaults.bathrooms }}" placeholder="e.g. 2" />
+              </label>
+              <label>
+                Lookback days (sales)
+                <input type="number" name="lookback_days" min="1" max="3650" value="{{ defaults.lookback_days }}" />
               </label>
             </div>
 
@@ -52,9 +71,13 @@
       <section class="results">
         <div class="results-header">
           <div>
-            <h2>Results</h2>
-            <p>
-              {{ results.row_count }} listings. ZIPs: {{ results.zips }}. Types: {{ results.property_types }}.
+              <h2>Results</h2>
+              <p>
+              {{ results.row_count }} rows. ZIPs: {{ results.zips }}. Types: {{ results.property_types }}.
+              Mode: {% if results.query_type == 'sales' %}Sales{% else %}Active Listings{% endif %}.
+              {% if results.query_type == 'sales' %}
+              Last {{ results.lookback_days }} days.
+              {% endif %}
               Bedrooms: {{ results.bedrooms }}. Bathrooms: {{ results.bathrooms or 'Any' }}.
             </p>
           </div>

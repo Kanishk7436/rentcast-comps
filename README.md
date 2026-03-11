@@ -6,11 +6,19 @@ This project is a Flask web app that lets users query RentCast long‑term renta
 ## What It Can Do
 - Pull active long‑term rental listings for selected ZIP codes and beds/baths, for **Single Family** only.
 - Return full RentCast listing payload fields and preview them in the web UI.
+- Generate sales output from `/properties` for the last N days and output in:
+  - Bedrooms, Bathrooms, Square Footage, Address, Sale Price
+- Generate active rental listing output (also in the same 5-column format).
 - Allow CSV export of the query output for underwriting and market review.
 - Provide a lightweight web interface with employer-ready access controls.
 
 ## Output (CSV Fields)
-Fields are dynamic and come from the RentCast listing response schema.
+Every export is currently normalized to:
+- Bedrooms
+- Bathrooms
+- Square Footage
+- Address
+- Sale Price
 
 ## Cost & API Usage
 This script consumes RentCast API calls; total cost depends on your plan.

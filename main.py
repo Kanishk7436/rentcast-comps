@@ -363,12 +363,110 @@ def run_mls_active_listings(
         deduped_records.append(record)
 
     if not deduped_records:
-        df = pd.DataFrame([])
+        df = pd.DataFrame(
+            columns=["Bedrooms", "Bathrooms", "Square Footage", "Address", "Sale Price"]
+        )
         df.to_csv(out_path, index=False)
         print(f"Saved: {out_path} (0 rows)")
         return df
 
-    df = pd.json_normalize(deduped_records)
+    rows: List[Dict[str, Any]] = []
+    for record in deduped_records:
+        address = first_present(record, "formattedAddress", "address", "addressLine1")
+        sale_price = first_present(record, "price", "askingPrice")
+        if not address or sale_price is None:
+            continue
+
+        rows.append(
+            {
+                "Bedrooms": first_present(record, "bedrooms", "beds"),
+                "Bathrooms": first_present(record, "bathrooms", "baths"),
+                "Square Footage": first_present(record, "squareFootage", "sqft"),
+                "Address": address,
+                "Sale Price": sale_price,
+            }
+        )
+
+    df = pd.DataFrame(rows, columns=["Bedrooms", "Bathrooms", "Square Footage", "Address", "Sale Price"])
+    if df.empty:
+        df.to_csv(out_path, index=False)
+        print(f"Saved: {out_path} ({len(df)} rows)")
+        return df
+
+    df.to_csv(out_path, index=False)
+    print(f"Saved: {out_path} ({len(df)} rows)")
+    return df
+
+
+def run_sales_properties_last_12_months(
+    target_zips: Optional[List[str]] = None,
+    target_property_types: Optional[List[str]] = None,
+    target_bedrooms: Optional[str] = DEFAULT_BEDROOMS,
+    target_bathrooms: Optional[str] = DEFAULT_BATHROOMS,
+    lookback_days: int = SALES_LOOKBACK_DAYS,
+    out_path: str = SALES_OUT_PATH,
+) -> pd.DataFrame:
+    """Fetch sold/last-sale properties and normalize output to the standard sales columns."""
+    load_dotenv()
+    os.makedirs("output", exist_ok=True)
+
+    target_zips = target_zips or AHWATUKEE_ZIPS
+    target_property_types = target_property_types or ["Single Family"]
+    target_bedrooms = str(target_bedrooms).strip() if target_bedrooms is not None else ""
+    target_bathrooms = str(target_bathrooms).strip() if target_bathrooms is not None else ""
+    min_days = 1
+    max_days = max(1, int(lookback_days))
+    cutoff_date = datetime.utcnow() - timedelta(days=max_days)
+
+    all_records: List[Dict[str, Any]] = []
+    for zip_code in target_zips:
+        for property_type in target_property_types:
+            params = {
+                "zipCode": zip_code,
+                "propertyType": property_type,
+                "saleDateRange": f"{min_days}-{max_days}",
+            }
+            if target_bedrooms:
+                params["bedrooms"] = target_bedrooms
+            if target_bathrooms:
+                params["bathrooms"] = target_bathrooms
+
+            all_records.extend(fetch_paginated_records("/properties", params=params))
+
+    rows: List[Dict[str, Any]] = []
+    seen = set()
+    for record in all_records:
+        sale_date = parse_iso_date(
+            first_present(record, "lastSaleDate", "lastSoldDate", "saleDate", "soldDate")
+        )
+        if sale_date is None or sale_date.to_pydatetime().replace(tzinfo=None) < cutoff_date:
+            continue
+
+        listing_id = record.get("id")
+        if listing_id and listing_id in seen:
+            continue
+        if listing_id:
+            seen.add(listing_id)
+
+        address = first_present(record, "formattedAddress", "address", "addressLine1")
+        sale_price = first_present(record, "lastSalePrice", "lastSoldPrice", "salePrice", "price")
+        if not address or sale_price is None:
+            continue
+
+        rows.append(
+            {
+                "Bedrooms": first_present(record, "bedrooms", "beds"),
+                "Bathrooms": first_present(record, "bathrooms", "baths"),
+                "Square Footage": first_present(record, "squareFootage", "sqft"),
+                "Address": address,
+                "Sale Price": sale_price,
+            }
+        )
+
+    df = pd.DataFrame(
+        rows,
+        columns=["Bedrooms", "Bathrooms", "Square Footage", "Address", "Sale Price"],
+    )
     df.to_csv(out_path, index=False)
     print(f"Saved: {out_path} ({len(df)} rows)")
     return df

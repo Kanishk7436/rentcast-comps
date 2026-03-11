@@ -12,6 +12,7 @@ from main import (
     DEFAULT_PROPERTY_TYPES,
     DEFAULT_ZIPS,
     run_mls_active_listings,
+    run_sales_properties_last_12_months,
 )
 
 app = Flask(__name__)
@@ -66,6 +67,8 @@ def index():
             "property_types": DEFAULT_PROPERTY_TYPES,
             "bedrooms": DEFAULT_BEDROOMS,
             "bathrooms": DEFAULT_BATHROOMS,
+            "query_type": "sales",
+            "lookback_days": "365",
         },
         results=None,
         error=None,
@@ -79,19 +82,33 @@ def run():
         property_types = ["Single Family"]
         bedrooms = request.form.get("bedrooms", DEFAULT_BEDROOMS).strip() or DEFAULT_BEDROOMS
         bathrooms = request.form.get("bathrooms", DEFAULT_BATHROOMS).strip() or DEFAULT_BATHROOMS
+        query_type = request.form.get("query_type", "sales").strip() or "sales"
+        lookback_days = request.form.get("lookback_days", "365").strip()
+        lookback_days = int(lookback_days) if lookback_days.isdigit() else 365
 
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         suffix = uuid.uuid4().hex[:6]
-        filename = f"rent_comps_{ts}_{suffix}.csv"
+        filename_prefix = "rentcast_sales" if query_type == "sales" else "rentcast_listings"
+        filename = f"{filename_prefix}_{ts}_{suffix}.csv"
         out_path = os.path.join("output", filename)
 
-        df = run_mls_active_listings(
-            target_zips=zips,
-            target_property_types=property_types,
-            target_bedrooms=bedrooms,
-            target_bathrooms=bathrooms,
-            out_path=out_path,
-        )
+        if query_type == "sales":
+            df = run_sales_properties_last_12_months(
+                target_zips=zips,
+                target_property_types=property_types,
+                target_bedrooms=bedrooms,
+                target_bathrooms=bathrooms,
+                lookback_days=lookback_days,
+                out_path=out_path,
+            )
+        else:
+            df = run_mls_active_listings(
+                target_zips=zips,
+                target_property_types=property_types,
+                target_bedrooms=bedrooms,
+                target_bathrooms=bathrooms,
+                out_path=out_path,
+            )
 
         table_html = df.head(200).to_html(index=False, classes="table")
         csv_bytes = df.to_csv(index=False).encode("utf-8")
@@ -107,6 +124,8 @@ def run():
             "property_types": ", ".join(property_types),
             "bedrooms": bedrooms,
             "bathrooms": bathrooms,
+            "query_type": query_type,
+            "lookback_days": str(lookback_days),
         }
 
         return render_template(
@@ -116,6 +135,8 @@ def run():
                 "property_types": property_types,
                 "bedrooms": bedrooms,
                 "bathrooms": bathrooms,
+                "query_type": query_type,
+                "lookback_days": str(lookback_days),
             },
             results=results,
             error=None,
@@ -128,6 +149,8 @@ def run():
                 "property_types": DEFAULT_PROPERTY_TYPES,
                 "bedrooms": DEFAULT_BEDROOMS,
                 "bathrooms": DEFAULT_BATHROOMS,
+                "query_type": "sales",
+                "lookback_days": "365",
             },
             results=None,
             error=str(exc),
