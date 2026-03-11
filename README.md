@@ -38,7 +38,7 @@ Call volume scales with number of ZIPs, property types, filters, and pagination.
 6. Deploy.
 
 Notes:
-- App listens on Render’s dynamic `PORT` automatically.
+- Render uses `PORT=10000`; if `PORT` is missing, app defaults to `10000`.
 - The app writes CSVs to `output/` at runtime and serves them for download.
 - If CSV download is not working, ensure `output/` exists in the container (it is created at run-time by the app code).
 
