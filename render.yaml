@@ -4,10 +4,8 @@ services:
     runtime: python
     region: oregon
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn app:app --bind 0.0.0.0:10000"
+    startCommand: "gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120 --workers 1"
     envVars:
-      - key: PORT
-        value: "10000"
       - key: RENTCAST_API_KEY
         sync: false
       - key: APP_USERNAME
