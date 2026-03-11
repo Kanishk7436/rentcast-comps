@@ -1,0 +1,65 @@
+address,year_built,home_sqft,bedrooms,bathrooms,garage_spaces,asking_rent,rent_per_sqft,furnished,pool,lot_sqft,status,days_on_market,last_seen_date,listing_id,zipCode,city,state,propertyType
+"3502 S Chaparral Rd, Apache Junction, AZ 85119",,1186.0,3,2.0,1.0,1925,1.6231,Unknown,True,3750.0,Active,1,2026-02-06T02:26:13.903Z,"3502-S-Chaparral-Rd,-Apache-Junction,-AZ-85119",85119,Apache Junction,AZ,Single Family
+"3453 S Chaparral Rd, Apache Junction, AZ 85119",,1615.0,3,2.5,1.0,1885,1.1672,Unknown,True,2995.0,Active,1,2026-02-06T02:23:12.032Z,"3453-S-Chaparral-Rd,-Apache-Junction,-AZ-85119",85119,Apache Junction,AZ,Single Family
+"3264 S Chaparral Rd, Apache Junction, AZ 85119",2003.0,2274.0,3,2.5,1.0,1950,0.8575,Unknown,,3049.0,Active,90,2026-02-06T02:11:49.447Z,"3264-S-Chaparral-Rd,-Apache-Junction,-AZ-85119",85119,Apache Junction,AZ,Single Family
+"2349 E 35th Ave, Apache Junction, AZ 85119",,1614.0,3,2.5,1.0,2035,1.2608,Unknown,True,2995.0,Active,1,2026-02-04T01:48:32.931Z,"2349-E-35th-Ave,-Apache-Junction,-AZ-85119",85119,Apache Junction,AZ,Single Family
+"528 E Navajo Ave, Apt 3, Apache Junction, AZ 85119",2006.0,1024.0,3,2.0,,1650,1.6113,Unknown,,7841.0,Active,81,2026-02-06T02:01:53.180Z,"528-E-Navajo-Ave,-Apt-3,-Apache-Junction,-AZ-85119",85119,Apache Junction,AZ,Townhouse
+"540 S Ocotillo Dr, Apache Junction, AZ 85120",,950.0,3,2.0,,1950,2.0526,Unknown,,6000.0,Active,1,2026-02-06T02:30:41.043Z,"540-S-Ocotillo-Dr,-Apache-Junction,-AZ-85120",85120,Apache Junction,AZ,Single Family
+"1691 W Spaulding Ave, Apache Junction, AZ 85120",,1432.0,3,2.0,,1949,1.361,Unknown,,4800.0,Active,1,2026-02-06T02:23:12.022Z,"1691-W-Spaulding-Ave,-Apache-Junction,-AZ-85120",85120,Apache Junction,AZ,Single Family
+"1866 W 20th Ave, Apache Junction, AZ 85120",,1368.0,3,2.0,1.0,2065,1.5095,Unknown,,4725.0,Active,1,2026-02-06T02:23:11.952Z,"1866-W-20th-Ave,-Apache-Junction,-AZ-85120",85120,Apache Junction,AZ,Single Family
+"3226 W Stanton Ave, Apache Junction, AZ 85120",,1545.0,3,2.0,,2250,1.4563,Unknown,,5042.0,Active,1,2026-02-06T02:23:11.941Z,"3226-W-Stanton-Ave,-Apache-Junction,-AZ-85120",85120,Apache Junction,AZ,Single Family
+"905 N Ocotillo Dr, Apache Junction, AZ 85120",1978.0,1308.0,3,2.0,1.0,1800,1.3761,Unknown,,8276.0,Active,8,2026-02-06T00:44:06.145Z,"905-N-Ocotillo-Dr,-Apache-Junction,-AZ-85120",85120,Apache Junction,AZ,Single Family
+"10535 E Boulder Dr, Apache Junction, AZ 85120",1959.0,1040.0,3,1.5,1.0,1900,1.8269,Unknown,,16553.0,Active,95,2026-02-05T03:20:17.497Z,"10535-E-Boulder-Dr,-Apache-Junction,-AZ-85120",85120,Apache Junction,AZ,Single Family
+"2292 N Ironwood Dr, Lot 119, Apache Junction, AZ 85120",,1253.0,3,2.0,,1500,1.1971,Unknown,,,Active,1,2026-02-05T02:34:39.678Z,"2292-N-Ironwood-Dr,-Lot-119,-Apache-Junction,-AZ-85120",85120,Apache Junction,AZ,Single Family
+"1037 W 7th Ave, Apache Junction, AZ 85120",,1387.0,3,2.0,1.0,2100,1.5141,Unknown,,6050.0,Active,1,2026-02-05T02:30:00.734Z,"1037-W-7th-Ave,-Apache-Junction,-AZ-85120",85120,Apache Junction,AZ,Single Family
+"854 S San Marcos Dr, Apache Junction, AZ 85120",,1500.0,3,2.0,,1749,1.166,Unknown,,871.0,Active,1,2026-02-06T02:26:13.950Z,"854-S-San-Marcos-Dr,-Apache-Junction,-AZ-85120",85120,Apache Junction,AZ,Townhouse
+"651 N Ironwood Dr, Apt 1, Apache Junction, AZ 85120",2025.0,1840.0,3,2.5,,1845,1.0027,Unknown,,2614.0,Active,125,2026-02-06T02:11:49.863Z,"651-N-Ironwood-Dr,-Apt-1,-Apache-Junction,-AZ-85120",85120,Apache Junction,AZ,Townhouse
+"3610 N Desert Oasis, Mesa, AZ 85207",,,3,2.0,,7500,,Unknown,,,Active,609,2026-02-06T02:24:19.579Z,"3610-N-Desert-Oasis,-Mesa,-AZ-85207",85207,Mesa,AZ,Single Family
+"422 N 110th St, Mesa, AZ 85207",2000.0,1418.0,3,2.0,,1980,1.3963,Unknown,,6600.0,Active,883,2026-02-06T02:21:19.368Z,"422-N-110th-St,-Mesa,-AZ-85207",85207,Mesa,AZ,Single Family
+"3060 N Ridgecrest, Unit 175, Mesa, AZ 85207",1997.0,2226.0,3,2.0,,4500,2.0216,Unknown,,9583.0,Active,1019,2026-02-06T02:17:26.293Z,"3060-N-Ridgecrest,-Unit-175,-Mesa,-AZ-85207",85207,Mesa,AZ,Single Family
+"153 N Greenwood, Mesa, AZ 85207",2003.0,1893.0,3,3.0,,3200,1.6904,Unknown,,6534.0,Active,943,2026-02-06T02:17:26.280Z,"153-N-Greenwood,-Mesa,-AZ-85207",85207,Mesa,AZ,Single Family
+"11550 E Contessa St, Mesa, AZ 85207",1998.0,1388.0,3,2.0,,1900,1.3689,Unknown,,5227.0,Active,8,2026-02-05T03:37:05.395Z,"11550-E-Contessa-St,-Mesa,-AZ-85207",85207,Mesa,AZ,Single Family
+"3634 N Morning Dove, Mesa, AZ 85207",1998.0,1571.0,3,2.0,,5000,3.1827,Unknown,,6534.0,Active,274,2026-02-05T03:31:51.174Z,"3634-N-Morning-Dove,-Mesa,-AZ-85207",85207,Mesa,AZ,Single Family
+"6926 E Butte St, Mesa, AZ 85207",,2219.0,3,2.5,,2685,1.21,Unknown,,,Active,19,2026-02-05T03:31:41.441Z,"6926-E-Butte-St,-Mesa,-AZ-85207",85207,Mesa,AZ,Single Family
+"9053 E Hobart St, Mesa, AZ 85207",2000.0,1891.0,3,2.0,,5500,2.9085,Unknown,,8712.0,Active,64,2026-02-05T03:18:44.054Z,"9053-E-Hobart-St,-Mesa,-AZ-85207",85207,Mesa,AZ,Single Family
+"809 N 95th Pl, Mesa, AZ 85207",1975.0,1060.0,3,2.0,,1899,1.7915,Unknown,,,Active,3,2026-02-03T03:43:35.781Z,"809-N-95th-Pl,-Mesa,-AZ-85207",85207,Mesa,AZ,Single Family
+"503 N St, Claire, Mesa, AZ 85207",1999.0,1568.0,3,2.0,,1850,1.1798,Unknown,,6951.0,Active,29,2026-02-03T03:33:42.416Z,"503-N-St,-Claire,-Mesa,-AZ-85207",85207,Mesa,AZ,Single Family
+"113 N 88th Pl, Unit 2, Mesa, AZ 85207",2026.0,1007.0,3,2.0,,1750,1.7378,Unknown,,6098.0,Active,2,2026-02-06T02:27:56.933Z,"113-N-88th-Pl,-Unit-2,-Mesa,-AZ-85207",85207,Mesa,AZ,Townhouse
+"2141 N 88th St, Mesa, AZ 85207",2016.0,1842.0,3,2.0,,3500,1.9001,Unknown,,5227.0,Active,795,2026-02-06T02:21:19.449Z,"2141-N-88th-St,-Mesa,-AZ-85207",85207,Mesa,AZ,Townhouse
+"2944 N 72nd St, Mesa, AZ 85207",2016.0,2087.0,3,3.5,,2750,1.3177,Unknown,,2614.0,Active,218,2026-02-05T03:30:49.298Z,"2944-N-72nd-St,-Mesa,-AZ-85207",85207,Mesa,AZ,Townhouse
+"113 N 88th Pl, Unit 1, Mesa, AZ 85207",2026.0,1007.0,3,2.0,,1750,1.7378,Unknown,,6098.0,Active,29,2026-02-05T03:27:14.906Z,"113-N-88th-Pl,-Unit-1,-Mesa,-AZ-85207",85207,Mesa,AZ,Townhouse
+"9953 E Billings St, Apt 3, Mesa, AZ 85207",1988.0,850.0,3,2.0,,1550,1.8235,Unknown,,14375.0,Active,50,2026-02-05T03:23:26.398Z,"9953-E-Billings-St,-Apt-3,-Mesa,-AZ-85207",85207,Mesa,AZ,Townhouse
+"7310 E Dewan Cir, Mesa, AZ 85208",1986.0,1688.0,3,2.0,,2249,1.3323,Unknown,,,Active,8,2026-02-06T02:39:04.111Z,"7310-E-Dewan-Cir,-Mesa,-AZ-85208",85208,Mesa,AZ,Single Family
+"932 S 72nd St, Mesa, AZ 85208",1973.0,1736.0,3,2.0,,2500,1.4401,Unknown,,8712.0,Active,386,2026-02-06T02:38:35.463Z,"932-S-72nd-St,-Mesa,-AZ-85208",85208,Mesa,AZ,Single Family
+"9548 E Bramble Ave, Mesa, AZ 85208",2007.0,1581.0,3,2.5,,1950,1.2334,Unknown,,2240.0,Active,827,2026-02-06T02:21:19.404Z,"9548-E-Bramble-Ave,-Mesa,-AZ-85208",85208,Mesa,AZ,Single Family
+"163 S Parkwood, Mesa, AZ 85208",,1540.0,3,2.5,,2160,1.4026,Unknown,,,Active,1,2026-02-05T03:45:23.819Z,"163-S-Parkwood,-Mesa,-AZ-85208",85208,Mesa,AZ,Single Family
+"10933 E Clovis Ave, Mesa, AZ 85208",,1302.0,3,2.0,,1940,1.49,Unknown,,,Active,1,2026-02-05T03:45:23.800Z,"10933-E-Clovis-Ave,-Mesa,-AZ-85208",85208,Mesa,AZ,Single Family
+"7251 E Balmoral Ave, Mesa, AZ 85208",1998.0,1863.0,3,2.0,,2045,1.0977,Unknown,,10454.0,Active,1,2026-02-05T03:44:45.224Z,"7251-E-Balmoral-Ave,-Mesa,-AZ-85208",85208,Mesa,AZ,Single Family
+"11111 E Flossmoor Ave, Unit 1, Mesa, AZ 85208",1999.0,1217.0,3,2.0,,1965,1.6146,Unknown,,,Active,1171,2026-02-05T03:42:29.538Z,"11111-E-Flossmoor-Ave,-Unit-1,-Mesa,-AZ-85208",85208,Mesa,AZ,Single Family
+"451 S Hawes Rd, Unit 37, Mesa, AZ 85208",2007.0,1279.0,3,1.5,,1899,1.4848,Unknown,,,Active,23,2026-02-05T03:29:24.614Z,"451-S-Hawes-Rd,-Unit-37,-Mesa,-AZ-85208",85208,Mesa,AZ,Single Family
+"233 S Travis, Mesa, AZ 85208",2012.0,1436.0,3,2.5,,1845,1.2848,Unknown,,,Active,24,2026-02-05T03:28:30.357Z,"233-S-Travis,-Mesa,-AZ-85208",85208,Mesa,AZ,Single Family
+"10422 E Bramble Ave, Mesa, AZ 85208",1998.0,1450.0,3,2.0,,1895,1.3069,Unknown,,6534.0,Active,155,2026-02-05T03:27:16.630Z,"10422-E-Bramble-Ave,-Mesa,-AZ-85208",85208,Mesa,AZ,Single Family
+"451 S Hawes Rd, Unit 60, Mesa, AZ 85208",2007.0,1342.0,3,2.5,,2025,1.5089,Unknown,,,Active,42,2026-02-05T03:23:33.985Z,"451-S-Hawes-Rd,-Unit-60,-Mesa,-AZ-85208",85208,Mesa,AZ,Single Family
+"9934 E Empress Ave, Mesa, AZ 85208",2006.0,1464.0,3,2.5,,2395,1.6359,Unknown,,3485.0,Active,98,2026-02-05T03:20:17.525Z,"9934-E-Empress-Ave,-Mesa,-AZ-85208",85208,Mesa,AZ,Single Family
+"11252 E Calypso Ave, Mesa, AZ 85208",2017.0,1434.0,3,2.0,,3000,2.0921,Unknown,,13068.0,Active,81,2026-02-05T03:18:53.384Z,"11252-E-Calypso-Ave,-Mesa,-AZ-85208",85208,Mesa,AZ,Single Family
+"10348 E Crescent Ave, Mesa, AZ 85208",2000.0,1308.0,3,2.0,,1900,1.4526,Unknown,,,Active,27,2026-02-03T03:35:17.082Z,"10348-E-Crescent-Ave,-Mesa,-AZ-85208",85208,Mesa,AZ,Single Family
+"220 S 92nd Pl, Unit 2, Mesa, AZ 85208",2026.0,1007.0,3,2.0,,1750,1.7378,Unknown,,6970.0,Active,2,2026-02-06T02:27:56.940Z,"220-S-92nd-Pl,-Unit-2,-Mesa,-AZ-85208",85208,Mesa,AZ,Townhouse
+"616 S 96th Pl, Unit 1, Mesa, AZ 85208",1979.0,1450.0,3,2.0,,1750,1.2069,Unknown,,9148.0,Active,2,2026-02-06T01:40:31.288Z,"616-S-96th-Pl,-Unit-1,-Mesa,-AZ-85208",85208,Mesa,AZ,Townhouse
+"336 S 98th St, Unit 1, Mesa, AZ 85208",2026.0,1007.0,3,2.0,,1750,1.7378,Unknown,,7405.0,Active,15,2026-02-05T03:32:59.338Z,"336-S-98th-St,-Unit-1,-Mesa,-AZ-85208",85208,Mesa,AZ,Townhouse
+"220 S 92nd Pl, Unit 1, Mesa, AZ 85208",2026.0,1007.0,3,2.0,,1750,1.7378,Unknown,,6970.0,Active,29,2026-02-05T03:27:14.907Z,"220-S-92nd-Pl,-Unit-1,-Mesa,-AZ-85208",85208,Mesa,AZ,Townhouse
+"10134 E Isabella Ave, Mesa, AZ 85209",2005.0,1821.0,3,3.0,,2000,1.0983,Unknown,,2614.0,Active,4,2026-02-06T02:31:57.341Z,"10134-E-Isabella-Ave,-Mesa,-AZ-85209",85209,Mesa,AZ,Single Family
+"7515 E Laguna Azul Ave, Mesa, AZ 85209",1994.0,2169.0,3,3.0,,4500,2.0747,Unknown,,5227.0,Active,592,2026-02-06T02:24:19.593Z,"7515-E-Laguna-Azul-Ave,-Mesa,-AZ-85209",85209,Mesa,AZ,Single Family
+"8442 E Navarro Cir, Mesa, AZ 85209",,1665.0,3,2.0,,2225,1.3363,Unknown,,,Active,1,2026-02-05T03:47:00.611Z,"8442-E-Navarro-Cir,-Mesa,-AZ-85209",85209,Mesa,AZ,Single Family
+"9233 E Neville Ave, Mesa, AZ 85209",2003.0,1064.0,3,2.0,,2060,1.9361,Unknown,,,Active,8,2026-02-05T03:35:32.414Z,"9233-E-Neville-Ave,-Mesa,-AZ-85209",85209,Mesa,AZ,Single Family
+"8565 E Lakeview Ave, Mesa, AZ 85209",2001.0,1509.0,3,2.0,,2000,1.3254,Unknown,,7405.0,Active,9,2026-02-05T03:35:32.352Z,"8565-E-Lakeview-Ave,-Mesa,-AZ-85209",85209,Mesa,AZ,Single Family
+"8548 E Laguna Azul Ave, Mesa, AZ 85209",2001.0,1664.0,3,2.0,,1995,1.1989,Unknown,,5663.0,Active,11,2026-02-05T03:34:43.751Z,"8548-E-Laguna-Azul-Ave,-Mesa,-AZ-85209",85209,Mesa,AZ,Single Family
+"9233 E Neville Ave, Unit 1153, Mesa, AZ 85209",2002.0,1426.0,3,2.5,,1850,1.2973,Unknown,,871.0,Active,209,2026-02-05T03:30:49.235Z,"9233-E-Neville-Ave,-Unit-1153,-Mesa,-AZ-85209",85209,Mesa,AZ,Single Family
+"8716 E Navarro Ave, Mesa, AZ 85209",2019.0,1784.0,3,2.0,,2395,1.3425,Unknown,,4792.0,Active,21,2026-02-05T03:30:38.311Z,"8716-E-Navarro-Ave,-Mesa,-AZ-85209",85209,Mesa,AZ,Single Family
+"2744 S Raven, Mesa, AZ 85209",1995.0,1544.0,3,2.5,,2695,1.7455,Unknown,,5227.0,Active,22,2026-02-05T03:30:38.191Z,"2744-S-Raven,-Mesa,-AZ-85209",85209,Mesa,AZ,Single Family
+"11401 E Medina Ave, Mesa, AZ 85209",2003.0,1986.0,3,2.0,,2600,1.3092,Unknown,,13504.0,Active,59,2026-02-05T03:19:28.914Z,"11401-E-Medina-Ave,-Mesa,-AZ-85209",85209,Mesa,AZ,Single Family
+"7251 E Lomita Ave, Mesa, AZ 85209",1996.0,1630.0,3,2.0,,2495,1.5307,Unknown,,6098.0,Active,73,2026-02-05T03:18:10.743Z,"7251-E-Lomita-Ave,-Mesa,-AZ-85209",85209,Mesa,AZ,Single Family
+"1235 S Amador, Mesa, AZ 85209",,1558.0,3,3.0,,2075,1.3318,Unknown,,,Active,1,2026-02-04T03:51:11.281Z,"1235-S-Amador,-Mesa,-AZ-85209",85209,Mesa,AZ,Single Family
+"2027 S 87th Pl, Mesa, AZ 85209",,2090.0,3,2.5,,2500,1.1962,Unknown,,,Active,1,2026-02-04T03:51:11.263Z,"2027-S-87th-Pl,-Mesa,-AZ-85209",85209,Mesa,AZ,Single Family
+"8741 E Kiva Ave, Mesa, AZ 85209",,1808.0,3,2.5,,2099,1.161,Unknown,,,Active,1,2026-02-04T03:51:11.257Z,"8741-E-Kiva-Ave,-Mesa,-AZ-85209",85209,Mesa,AZ,Single Family
+"9233 E Neville Ave, Unit 1099, Mesa, AZ 85209",,1118.0,3,2.0,,1850,1.6547,Unknown,,,Active,406,2026-02-06T02:32:43.724Z,"9233-E-Neville-Ave,-Unit-1099,-Mesa,-AZ-85209",85209,Mesa,AZ,Townhouse
+"1330 S Aaron, Unit 213, Mesa, AZ 85209",2006.0,1449.0,3,2.5,,1899,1.3106,Unknown,,871.0,Active,22,2026-02-05T03:30:38.208Z,"1330-S-Aaron,-Unit-213,-Mesa,-AZ-85209",85209,Mesa,AZ,Townhouse

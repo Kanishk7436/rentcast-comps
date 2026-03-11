@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RentCast Rental Comps</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div>
+          <div class="eyebrow">Rental comps dashboard</div>
+          <h1>RentCast Rental Comps Extractor</h1>
+          <p class="subhead">
+            Enter ZIP codes, bedrooms, and optional bathrooms. The app pulls active MLS
+            listings from RentCast and returns the full listing payload for download.
+          </p>
+        </div>
+        <div class="card">
+          <form method="post" action="/run">
+            <label>
+              ZIP codes (comma‑separated)
+              <textarea name="zips" rows="2">{{ defaults.zips }}</textarea>
+            </label>
+
+            <div class="row">
+              <label>
+                Bedrooms
+                <input type="text" name="bedrooms" value="{{ defaults.bedrooms }}" />
+              </label>
+              <label>
+                Bathrooms
+                <input type="text" name="bathrooms" value="{{ defaults.bathrooms }}" placeholder="e.g. 2" />
+              </label>
+            </div>
+
+            <fieldset>
+              <legend>Property types</legend>
+              <label class="check">
+                <input type="checkbox" name="property_types" value="Single Family"
+                  {% if 'Single Family' in defaults.property_types %}checked{% endif %} />
+                Single Family
+              </label>
+              <label class="check">
+                <input type="checkbox" name="property_types" value="Townhouse"
+                  {% if 'Townhouse' in defaults.property_types %}checked{% endif %} />
+                Townhouse
+              </label>
+            </fieldset>
+
+            <button type="submit">Run comps</button>
+          </form>
+        </div>
+      </header>
+
+      {% if error %}
+      <div class="alert">{{ error }}</div>
+      {% endif %}
+
+      {% if results %}
+      <section class="results">
+        <div class="results-header">
+          <div>
+            <h2>Results</h2>
+            <p>
+              {{ results.row_count }} listings. ZIPs: {{ results.zips }}. Types: {{ results.property_types }}.
+              Bedrooms: {{ results.bedrooms }}. Bathrooms: {{ results.bathrooms or 'Any' }}.
+            </p>
+          </div>
+          <a class="button" href="/download/{{ results.filename }}">Download CSV</a>
+        </div>
+        <div class="table-wrap">
+          {{ results.table_html | safe }}
+        </div>
+        <div class="note">Showing first 200 rows.</div>
+      </section>
+      {% endif %}
+    </div>
+  </body>
+</html>

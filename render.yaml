@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: rentcast-comps
+    runtime: python
+    region: oregon
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python app.py"
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: RENTCAST_API_KEY
+        sync: false
