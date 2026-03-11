@@ -35,19 +35,9 @@
               </label>
             </div>
 
-            <fieldset>
-              <legend>Property types</legend>
-              <label class="check">
-                <input type="checkbox" name="property_types" value="Single Family"
-                  {% if 'Single Family' in defaults.property_types %}checked{% endif %} />
-                Single Family
-              </label>
-              <label class="check">
-                <input type="checkbox" name="property_types" value="Townhouse"
-                  {% if 'Townhouse' in defaults.property_types %}checked{% endif %} />
-                Townhouse
-              </label>
-            </fieldset>
+            <div class="note">
+              Property type is locked to <strong>Single Family</strong>.
+            </div>
 
             <button type="submit">Run comps</button>
           </form>

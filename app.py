@@ -74,7 +74,7 @@ def index():
 def run():
     try:
         zips = parse_list(request.form.get("zips", "")) or DEFAULT_ZIPS
-        property_types = request.form.getlist("property_types") or DEFAULT_PROPERTY_TYPES
+        property_types = ["Single Family"]
         bedrooms = request.form.get("bedrooms", DEFAULT_BEDROOMS).strip() or DEFAULT_BEDROOMS
         bathrooms = request.form.get("bathrooms", DEFAULT_BATHROOMS).strip() or DEFAULT_BATHROOMS
 

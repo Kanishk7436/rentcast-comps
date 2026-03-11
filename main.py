@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 BASE_URL = "https://api.rentcast.io/v1"
 
 DEFAULT_ZIPS = ["85119", "85120", "85207", "85208", "85209"]
-DEFAULT_PROPERTY_TYPES = ["Single Family", "Townhouse"]
+DEFAULT_PROPERTY_TYPES = ["Single Family"]
 DEFAULT_BEDROOMS = "3"
 DEFAULT_BATHROOMS = ""
 DEFAULT_OUT_PATH = "output/rent_comps_3br_sfh_townhouse.csv"
@@ -65,22 +65,22 @@ def parse_iso_date(value: Any) -> Optional[pd.Timestamp]:
 
 def fetch_paginated_records(
     path: str,
-    base_params: Dict[str, Any],
+    params: Dict[str, Any],
     page_size: int = PAGE_SIZE,
 ) -> List[Dict[str, Any]]:
     records: List[Dict[str, Any]] = []
     offset = 0
 
     while True:
-        params = dict(base_params)
-        params.update(
+        request_params = dict(params)
+        request_params.update(
             {
                 "limit": page_size,
                 "offset": offset,
                 "includeTotalCount": "true",
             }
         )
-        response = rc_get_response(path, params=params)
+        response = rc_get_response(path, params=request_params)
         payload = response.json()
 
         if not isinstance(payload, list):

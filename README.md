@@ -4,7 +4,7 @@
 This project is a Flask web app that lets users query RentCast long‑term rental listings by ZIP code, bedrooms, bathrooms, and property type. Results are pulled directly from RentCast and exported as CSV from the full MLS payload.
 
 ## What It Can Do
-- Pull active long‑term rental listings for selected ZIP codes, bedrooms, and bathrooms.
+- Pull active long‑term rental listings for selected ZIP codes and beds/baths, for **Single Family** only.
 - Return full RentCast listing payload fields and preview them in the web UI.
 - Allow CSV export of the query output for underwriting and market review.
 - Provide a lightweight web interface with employer-ready access controls.
