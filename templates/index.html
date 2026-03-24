@@ -3,94 +3,436 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>RentCast Rental Comps</title>
+    <title>Single-Family Intelligence Console</title>
     <link rel="stylesheet" href="/static/style.css" />
   </head>
   <body>
-    <div class="page">
-      <header class="hero">
-        <div>
-          <div class="eyebrow">Rental comps dashboard</div>
-          <h1>RentCast Rental Comps Extractor</h1>
-          <p class="subhead">
-            Enter ZIP codes, bedrooms, and optional bathrooms. Pull active rental
-            listings, sales data, or both.
+    {% macro stat_grid(cards) -%}
+      <div class="stat-grid">
+        {% for card in cards %}
+          <article class="stat-card {{ card.tone }}">
+            <span class="stat-label">{{ card.label }}</span>
+            <strong class="stat-value">{{ card.value }}</strong>
+            {% if card.hint %}
+              <span class="stat-hint">{{ card.hint }}</span>
+            {% endif %}
+          </article>
+        {% endfor %}
+      </div>
+    {%- endmacro %}
+
+    {% macro estimate_grid(cards) -%}
+      <div class="estimate-grid">
+        {% for card in cards %}
+          <article class="estimate-card {{ card.tone }}">
+            <span class="estimate-label">{{ card.label }}</span>
+            <strong class="estimate-value">{{ card.value }}</strong>
+            <span class="estimate-band">{{ card.band }}</span>
+            <span class="estimate-meta">{{ card.meta }}</span>
+          </article>
+        {% endfor %}
+      </div>
+    {%- endmacro %}
+
+    {% macro detail_groups(groups) -%}
+      <div class="detail-grid">
+        {% for group in groups %}
+          <article class="detail-card">
+            <h4>{{ group.title }}</h4>
+            {% if group["items"] %}
+              <dl>
+                {% for item in group["items"] %}
+                  <div>
+                    <dt>{{ item.label }}</dt>
+                    <dd>{{ item.value }}</dd>
+                  </div>
+                {% endfor %}
+              </dl>
+            {% else %}
+              <p class="empty-note">No fields returned for this group.</p>
+            {% endif %}
+          </article>
+        {% endfor %}
+      </div>
+    {%- endmacro %}
+
+    {% macro data_table(table) -%}
+      <div class="table-card {% if table.empty %}is-empty{% endif %}">
+        {% if table.empty %}
+          <div class="empty-state">No rows returned for this query.</div>
+        {% else %}
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  {% for column in table.columns %}
+                    <th>{{ column }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in table.rows %}
+                  <tr>
+                    {% for column in table.columns %}
+                      <td>{{ row[column] }}</td>
+                    {% endfor %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footnote">Showing {{ table.display_count }} of {{ table.row_count }} rows.</div>
+        {% endif %}
+      </div>
+    {%- endmacro %}
+
+    <div class="page-shell">
+      <header class="hero-panel">
+        <div class="hero-copy">
+          <div class="eyebrow">RentCast API workbench</div>
+          <h1>Single-Family Intelligence Console</h1>
+          <p class="hero-text">
+            One UI for property records, AVM value and rent estimates, sale and rental comparables,
+            live listings, and ZIP-level market trends. Every request is locked to
+            <strong>{{ property_type }}</strong>.
           </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#property-lab">Open Property Lab</a>
+            <a class="button ghost" href="#listing-radar">Browse Listings</a>
+            <a class="button ghost" href="#zip-pulse">Watch ZIP Trends</a>
+          </div>
+          <div class="lock-strip">
+            <span class="lock-pill">Property Type: {{ property_type }}</span>
+            <span class="lock-pill muted">Address lookup, comps, listings, and market stats share the same constraint.</span>
+          </div>
         </div>
-        <div class="card">
-          <form method="post" action="/run">
-            <fieldset>
-              <legend>Data mode</legend>
-              <label class="check">
-                <input type="radio" name="query_scope" value="sales"
-                  {% if defaults.query_scope == 'sales' or defaults.query_scope == 'both' and not results %}checked{% endif %} />
-                Sales (last N days)
-              </label>
-              <label class="check">
-                <input type="radio" name="query_scope" value="listings"
-                  {% if defaults.query_scope == 'listings' %}checked{% endif %} />
-                Active Rental Listings
-              </label>
-              <label class="check">
-                <input type="radio" name="query_scope" value="both"
-                  {% if defaults.query_scope == 'both' %}checked{% endif %} />
-                Both Sales + Listings
-              </label>
-            </fieldset>
 
-            <label>
-              ZIP codes (comma‑separated)
-              <textarea name="zips" rows="2">{{ defaults.zips }}</textarea>
-            </label>
-
-            <div class="row">
-              <label>
-                Bedrooms
-                <input type="text" name="bedrooms" value="{{ defaults.bedrooms }}" />
-              </label>
-              <label>
-                Bathrooms
-                <input type="text" name="bathrooms" value="{{ defaults.bathrooms }}" placeholder="e.g. 2" />
-              </label>
-              <label>
-                Lookback days (sales)
-                <input type="number" name="lookback_days" min="1" max="3650" value="{{ defaults.lookback_days }}" />
-              </label>
-            </div>
-
-            <div class="note">
-              Property type is locked to <strong>Single Family</strong>.
-            </div>
-
-            <button type="submit">Run comps</button>
-          </form>
+        <div class="hero-board">
+          <article class="mini-panel warm">
+            <span>Property record</span>
+            <strong>Structural facts, ownership, features, tax history</strong>
+          </article>
+          <article class="mini-panel accent">
+            <span>AVM intelligence</span>
+            <strong>Value estimate, rent estimate, and comp-backed ranges</strong>
+          </article>
+          <article class="mini-panel dark">
+            <span>Market coverage</span>
+            <strong>Active sale and rental listings plus ZIP trend history</strong>
+          </article>
         </div>
       </header>
 
-      {% if error %}
-      <div class="alert">{{ error }}</div>
-      {% endif %}
-
-      {% if results %}
-      <section class="results">
-        {% for result in results %}
-        <div class="results-header">
-          <div>
-              <h2>{{ result.dataset_label }}</h2>
-              <p>
-              {{ result.row_count }} rows. ZIPs: {{ result.zips }}. Types: {{ result.property_types }}.
-              Bedrooms: {{ result.bedrooms }}. Bathrooms: {{ result.bathrooms or 'Any' }}.
-              </p>
-          </div>
-          <a class="button" href="/download/{{ result.download_token }}">Download CSV</a>
-        </div>
-        <div class="table-wrap">
-          {{ result.table_html | safe }}
-        </div>
-        <div class="note">Showing first 200 rows.</div>
-        {% endfor %}
+      <section class="capability-strip">
+        <article class="capability-card">
+          <span class="cap-label">01</span>
+          <h3>Property Lab</h3>
+          <p>Address-level record lookup with features, taxes, ownership, value estimate, rent estimate, and comp tables.</p>
+        </article>
+        <article class="capability-card">
+          <span class="cap-label">02</span>
+          <h3>Listing Radar</h3>
+          <p>Search active sale and rental inventory by ZIP or city/state, then filter by beds, baths, and result count.</p>
+        </article>
+        <article class="capability-card">
+          <span class="cap-label">03</span>
+          <h3>ZIP Pulse</h3>
+          <p>Track single-family market medians, inventory, days on market, and monthly trend history for a ZIP code.</p>
+        </article>
       </section>
-      {% endif %}
+
+      <section id="property-lab" class="section-shell">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">Address Intelligence</div>
+            <h2>Property Lab</h2>
+            <p>Pull the full property record, then stack sale comps and rental comps directly under the AVM outputs.</p>
+          </div>
+          <div class="section-badge">Single Family Only</div>
+        </div>
+
+        <div class="workbench">
+          <aside class="form-panel">
+            <form method="post" action="/property-intelligence">
+              <label>
+                Subject address
+                <textarea name="address" rows="3" placeholder="9609 S 44th St, Phoenix, AZ 85044">{{ property_form.address }}</textarea>
+              </label>
+
+              <div class="field-row two-up">
+                <label>
+                  Comparable count
+                  <input type="number" name="comp_count" min="1" max="25" value="{{ property_form.comp_count }}" />
+                </label>
+                <label>
+                  Radius (miles)
+                  <input type="number" name="max_radius" min="1" max="50" value="{{ property_form.max_radius }}" />
+                </label>
+              </div>
+
+              <div class="field-note">The address search uses RentCast property records, then calls both AVM endpoints with the same single-family constraint.</div>
+              <button class="button primary" type="submit">Pull Property Intelligence</button>
+            </form>
+          </aside>
+
+          <div class="result-panel">
+            {% if errors.property %}
+              <div class="alert">{{ errors.property }}</div>
+            {% endif %}
+
+            {% if results.property %}
+              <div class="result-hero">
+                <div>
+                  <div class="eyebrow">Property Match</div>
+                  <h3>{{ results.property.address }}</h3>
+                  <p>{{ results.property.city_state }}</p>
+                </div>
+                <div class="result-meta">{{ results.property.comp_count }} comps · {{ results.property.max_radius }} mile radius</div>
+              </div>
+
+              {{ estimate_grid(results.property.estimate_cards) }}
+              {{ stat_grid(results.property.fact_cards) }}
+              {{ detail_groups(results.property.detail_groups) }}
+
+              <div class="split-grid compact-gap">
+                <article class="dataset-card">
+                  <div class="dataset-header">
+                    <div>
+                      <div class="eyebrow">Tax Assessment History</div>
+                      <h4>Assessed Value Stack</h4>
+                    </div>
+                  </div>
+                  {{ data_table(results.property.tax_assessments) }}
+                </article>
+
+                <article class="dataset-card">
+                  <div class="dataset-header">
+                    <div>
+                      <div class="eyebrow">Property Tax History</div>
+                      <h4>Annual Tax Totals</h4>
+                    </div>
+                  </div>
+                  {{ data_table(results.property.property_taxes) }}
+                </article>
+              </div>
+
+              <article class="dataset-card">
+                <div class="dataset-header">
+                  <div>
+                    <div class="eyebrow">Comparables</div>
+                    <h4>{{ results.property.sale_comps.title }}</h4>
+                  </div>
+                  <a class="button ghost small" href="/download/{{ results.property.sale_comps.download_token }}">Download CSV</a>
+                </div>
+                {{ data_table(results.property.sale_comps.table) }}
+              </article>
+
+              <article class="dataset-card">
+                <div class="dataset-header">
+                  <div>
+                    <div class="eyebrow">Comparables</div>
+                    <h4>{{ results.property.rent_comps.title }}</h4>
+                  </div>
+                  <a class="button ghost small" href="/download/{{ results.property.rent_comps.download_token }}">Download CSV</a>
+                </div>
+                {{ data_table(results.property.rent_comps.table) }}
+              </article>
+            {% else %}
+              <div class="placeholder-card">
+                <div class="eyebrow">Ready</div>
+                <h3>Start with a subject property.</h3>
+                <p>Enter an address to retrieve the property record, estimate sale value and rent, and surface comparable sale and rental listings in one pass.</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+      <section id="listing-radar" class="section-shell">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">Live Inventory Search</div>
+            <h2>Listing Radar</h2>
+            <p>Search active sale listings, rental listings, or both. ZIP takes priority when both ZIP and city/state are filled in.</p>
+          </div>
+          <div class="section-badge">{{ property_type }}</div>
+        </div>
+
+        <div class="workbench">
+          <aside class="form-panel">
+            <form method="post" action="/listing-radar">
+              <fieldset>
+                <legend>Listing scope</legend>
+                <label class="check-row">
+                  <input type="radio" name="search_scope" value="sale" {% if listing_form.search_scope == 'sale' %}checked{% endif %} />
+                  Active sale listings
+                </label>
+                <label class="check-row">
+                  <input type="radio" name="search_scope" value="rental" {% if listing_form.search_scope == 'rental' %}checked{% endif %} />
+                  Active rental listings
+                </label>
+                <label class="check-row">
+                  <input type="radio" name="search_scope" value="both" {% if listing_form.search_scope == 'both' %}checked{% endif %} />
+                  Both sale and rental
+                </label>
+              </fieldset>
+
+              <div class="field-row two-up">
+                <label>
+                  ZIP code
+                  <input type="text" name="zip_code" value="{{ listing_form.zip_code }}" placeholder="85044" />
+                </label>
+                <label>
+                  State
+                  <input type="text" name="state" value="{{ listing_form.state }}" placeholder="AZ" />
+                </label>
+              </div>
+
+              <label>
+                City
+                <input type="text" name="city" value="{{ listing_form.city }}" placeholder="Phoenix" />
+              </label>
+
+              <div class="field-row three-up">
+                <label>
+                  Bedrooms
+                  <input type="text" name="bedrooms" value="{{ listing_form.bedrooms }}" placeholder="3" />
+                </label>
+                <label>
+                  Bathrooms
+                  <input type="text" name="bathrooms" value="{{ listing_form.bathrooms }}" placeholder="2" />
+                </label>
+                <label>
+                  Max rows
+                  <input type="number" name="limit" min="1" max="50" value="{{ listing_form.limit }}" />
+                </label>
+              </div>
+
+              <div class="field-note">All listing queries are locked to active single-family inventory.</div>
+              <button class="button primary" type="submit">Run Listing Search</button>
+            </form>
+          </aside>
+
+          <div class="result-panel">
+            {% if errors.listings %}
+              <div class="alert">{{ errors.listings }}</div>
+            {% endif %}
+
+            {% if results.listings %}
+              <div class="result-hero">
+                <div>
+                  <div class="eyebrow">Search Area</div>
+                  <h3>{{ results.listings.geography }}</h3>
+                  <p>Beds: {{ results.listings.filters.bedrooms }} · Baths: {{ results.listings.filters.bathrooms }} · Scope: {{ results.listings.search_scope|title }}</p>
+                </div>
+                <div class="result-meta">Limit {{ results.listings.filters.limit }}</div>
+              </div>
+
+              {% for dataset in results.listings.datasets %}
+                <article class="dataset-card">
+                  <div class="dataset-header">
+                    <div>
+                      <div class="eyebrow">Live Query Result</div>
+                      <h4>{{ dataset.title }}</h4>
+                    </div>
+                    <a class="button ghost small" href="/download/{{ dataset.download_token }}">Download CSV</a>
+                  </div>
+                  {{ stat_grid(dataset.summary_cards) }}
+                  {{ data_table(dataset.table) }}
+                </article>
+              {% endfor %}
+            {% else %}
+              <div class="placeholder-card">
+                <div class="eyebrow">Ready</div>
+                <h3>Scan active inventory.</h3>
+                <p>Use ZIP or city/state filters to search sale listings, rental listings, or both, then export the raw rows as CSV.</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+      <section id="zip-pulse" class="section-shell">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">Market Trends</div>
+            <h2>ZIP Pulse</h2>
+            <p>Review the single-family market snapshot and download the monthly sale and rental history for a ZIP code.</p>
+          </div>
+          <div class="section-badge">12-Month History</div>
+        </div>
+
+        <div class="workbench">
+          <aside class="form-panel">
+            <form method="post" action="/market-pulse">
+              <label>
+                ZIP code
+                <input type="text" name="zip_code" value="{{ market_form.zip_code }}" placeholder="85044" />
+              </label>
+
+              <div class="field-note">The trend cards use the single-family slice from RentCast market statistics whenever it is available.</div>
+              <button class="button primary" type="submit">Load ZIP Pulse</button>
+            </form>
+          </aside>
+
+          <div class="result-panel">
+            {% if errors.market %}
+              <div class="alert">{{ errors.market }}</div>
+            {% endif %}
+
+            {% if results.market %}
+              <div class="result-hero">
+                <div>
+                  <div class="eyebrow">ZIP Market</div>
+                  <h3>{{ results.market.zip_code }}</h3>
+                  <p>Monthly market history with sale and rent trends for single-family inventory.</p>
+                </div>
+              </div>
+
+              <div class="market-grid">
+                {% for panel in [results.market.sale_panel, results.market.rent_panel] %}
+                  <article class="dataset-card market-card">
+                    <div class="dataset-header">
+                      <div>
+                        <div class="eyebrow">{{ panel.title }}</div>
+                        <h4>Single-Family Trend</h4>
+                        <p class="tiny-copy">Updated {{ panel.updated }}</p>
+                      </div>
+                      <a class="button ghost small" href="/download/{{ panel.download_token }}">Download CSV</a>
+                    </div>
+                    <div class="trend-band">
+                      <div>
+                        <span class="trend-label">12-month median series</span>
+                        <strong>Monthly direction</strong>
+                      </div>
+                      <div class="trend-chart">{{ panel.trend_chart }}</div>
+                    </div>
+                    {{ stat_grid(panel.cards) }}
+                    {{ data_table(panel.table) }}
+                  </article>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="placeholder-card">
+                <div class="eyebrow">Ready</div>
+                <h3>Watch a ZIP code move.</h3>
+                <p>Load the sale and rent trend history for a ZIP to see medians, days on market, new listings, and inventory levels in a single-family view.</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </section>
     </div>
+
+    {% if focus_section %}
+      <script>
+        window.addEventListener("load", function () {
+          var target = document.getElementById("{{ focus_section }}");
+          if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        });
+      </script>
+    {% endif %}
   </body>
 </html>

@@ -8,9 +8,10 @@ import requests
 from dotenv import load_dotenv
 
 BASE_URL = "https://api.rentcast.io/v1"
+DEFAULT_PROPERTY_TYPE = "Single Family"
 
 DEFAULT_ZIPS = ["85119", "85120", "85207", "85208", "85209"]
-DEFAULT_PROPERTY_TYPES = ["Single Family"]
+DEFAULT_PROPERTY_TYPES = [DEFAULT_PROPERTY_TYPE]
 DEFAULT_BEDROOMS = "3"
 DEFAULT_BATHROOMS = ""
 DEFAULT_OUT_PATH = "output/rent_comps_3br_sfh_townhouse.csv"
@@ -19,6 +20,12 @@ SALES_OUT_PATH = "Ahwatukee_SFH_Sales_Last12Months_3-4Beds.xlsx"
 DEFAULT_SALES_BEDROOMS = ["3", "4"]
 SALES_LOOKBACK_DAYS = 365
 PAGE_SIZE = 500
+DEFAULT_COMP_COUNT = 8
+DEFAULT_MAX_RADIUS = 5
+DEFAULT_LISTING_LIMIT = 50
+DEFAULT_MARKET_ZIP = "85044"
+DEFAULT_LISTING_CITY = "Phoenix"
+DEFAULT_LISTING_STATE = "AZ"
 
 
 def rc_get_response(path: str, params: Optional[Dict[str, Any]] = None) -> requests.Response:
@@ -187,6 +194,302 @@ def property_lookup_by_address(address: str) -> Optional[Dict[str, Any]]:
     if isinstance(data, list) and len(data) > 0:
         return data[0]
     return None
+
+
+def clamp_int(
+    value: Any,
+    default: int,
+    minimum: int = 1,
+    maximum: Optional[int] = None,
+) -> int:
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        parsed = default
+
+    parsed = max(minimum, parsed)
+    if maximum is not None:
+        parsed = min(parsed, maximum)
+    return parsed
+
+
+def clean_optional_text(value: Optional[str]) -> str:
+    return str(value or "").strip()
+
+
+def fetch_property_record(address: str) -> Optional[Dict[str, Any]]:
+    load_dotenv()
+    cleaned_address = clean_optional_text(address)
+    if not cleaned_address:
+        return None
+    return property_lookup_by_address(cleaned_address)
+
+
+def fetch_value_estimate(
+    address: str,
+    comp_count: int = DEFAULT_COMP_COUNT,
+    max_radius: int = DEFAULT_MAX_RADIUS,
+) -> Dict[str, Any]:
+    load_dotenv()
+    cleaned_address = clean_optional_text(address)
+    if not cleaned_address:
+        raise RuntimeError("Address is required.")
+
+    params = {
+        "address": cleaned_address,
+        "propertyType": DEFAULT_PROPERTY_TYPE,
+        "compCount": clamp_int(comp_count, DEFAULT_COMP_COUNT, minimum=1, maximum=25),
+        "maxRadius": clamp_int(max_radius, DEFAULT_MAX_RADIUS, minimum=1, maximum=50),
+    }
+    return rc_get("/avm/value", params=params)
+
+
+def fetch_rent_estimate(
+    address: str,
+    comp_count: int = DEFAULT_COMP_COUNT,
+    max_radius: int = DEFAULT_MAX_RADIUS,
+) -> Dict[str, Any]:
+    load_dotenv()
+    cleaned_address = clean_optional_text(address)
+    if not cleaned_address:
+        raise RuntimeError("Address is required.")
+
+    params = {
+        "address": cleaned_address,
+        "propertyType": DEFAULT_PROPERTY_TYPE,
+        "compCount": clamp_int(comp_count, DEFAULT_COMP_COUNT, minimum=1, maximum=25),
+        "maxRadius": clamp_int(max_radius, DEFAULT_MAX_RADIUS, minimum=1, maximum=50),
+    }
+    return rc_get("/avm/rent/long-term", params=params)
+
+
+def fetch_listing_search_results(
+    listing_kind: str,
+    *,
+    zip_code: Optional[str] = None,
+    city: Optional[str] = None,
+    state: Optional[str] = None,
+    bedrooms: Optional[str] = None,
+    bathrooms: Optional[str] = None,
+    limit: int = DEFAULT_LISTING_LIMIT,
+) -> List[Dict[str, Any]]:
+    load_dotenv()
+    path_map = {
+        "sale": "/listings/sale",
+        "rental": "/listings/rental/long-term",
+    }
+    if listing_kind not in path_map:
+        raise RuntimeError("listing_kind must be 'sale' or 'rental'.")
+
+    params: Dict[str, Any] = {
+        "status": "Active",
+        "propertyType": DEFAULT_PROPERTY_TYPE,
+        "limit": clamp_int(limit, DEFAULT_LISTING_LIMIT, minimum=1, maximum=200),
+    }
+
+    cleaned_zip = clean_optional_text(zip_code)
+    cleaned_city = clean_optional_text(city)
+    cleaned_state = clean_optional_text(state)
+    cleaned_bedrooms = clean_optional_text(bedrooms)
+    cleaned_bathrooms = clean_optional_text(bathrooms)
+
+    if cleaned_zip:
+        params["zipCode"] = cleaned_zip
+    elif cleaned_city:
+        params["city"] = cleaned_city
+        if cleaned_state:
+            params["state"] = cleaned_state
+    else:
+        raise RuntimeError("Provide either a ZIP code or a city.")
+
+    if cleaned_bedrooms:
+        params["bedrooms"] = cleaned_bedrooms
+    if cleaned_bathrooms:
+        params["bathrooms"] = cleaned_bathrooms
+
+    return rc_get(path_map[listing_kind], params=params)
+
+
+def fetch_market_stats(zip_code: str) -> Dict[str, Any]:
+    load_dotenv()
+    cleaned_zip = clean_optional_text(zip_code)
+    if not cleaned_zip:
+        raise RuntimeError("ZIP code is required.")
+    return rc_get("/markets", params={"zipCode": cleaned_zip})
+
+
+def comparables_to_dataframe(records: List[Dict[str, Any]], value_label: str) -> pd.DataFrame:
+    rows: List[Dict[str, Any]] = []
+    for record in records:
+        value = first_present(record, "price", "rent")
+        sqft = first_present(record, "squareFootage", "sqft")
+        price_per_sqft = None
+        try:
+            if value is not None and sqft:
+                price_per_sqft = round(float(value) / float(sqft), 2)
+        except Exception:
+            price_per_sqft = None
+
+        rows.append(
+            {
+                "Address": first_present(record, "formattedAddress", "address", "addressLine1"),
+                value_label: value,
+                "Beds": first_present(record, "bedrooms", "beds"),
+                "Baths": first_present(record, "bathrooms", "baths"),
+                "Sq Ft": sqft,
+                "$/Sq Ft": price_per_sqft,
+                "Distance (mi)": first_present(record, "distance"),
+                "Correlation": first_present(record, "correlation"),
+                "Days on Market": first_present(record, "daysOnMarket"),
+                "Status": first_present(record, "status"),
+                "Listed Date": first_present(record, "listedDate"),
+                "Last Seen": first_present(record, "lastSeenDate"),
+            }
+        )
+
+    return pd.DataFrame(
+        rows,
+        columns=[
+            "Address",
+            value_label,
+            "Beds",
+            "Baths",
+            "Sq Ft",
+            "$/Sq Ft",
+            "Distance (mi)",
+            "Correlation",
+            "Days on Market",
+            "Status",
+            "Listed Date",
+            "Last Seen",
+        ],
+    )
+
+
+def listings_to_dataframe(records: List[Dict[str, Any]], value_label: str) -> pd.DataFrame:
+    rows: List[Dict[str, Any]] = []
+    for record in records:
+        value = first_present(record, "price", "rent")
+        sqft = first_present(record, "squareFootage", "sqft")
+        value_per_sqft = None
+        try:
+            if value is not None and sqft:
+                value_per_sqft = round(float(value) / float(sqft), 2)
+        except Exception:
+            value_per_sqft = None
+
+        rows.append(
+            {
+                "Address": first_present(record, "formattedAddress", "address", "addressLine1"),
+                value_label: value,
+                "Beds": first_present(record, "bedrooms", "beds"),
+                "Baths": first_present(record, "bathrooms", "baths"),
+                "Sq Ft": sqft,
+                "$/Sq Ft": value_per_sqft,
+                "Lot Size": first_present(record, "lotSize"),
+                "Days on Market": first_present(record, "daysOnMarket"),
+                "Status": first_present(record, "status"),
+                "Listed Date": first_present(record, "listedDate"),
+                "Last Seen": first_present(record, "lastSeenDate"),
+                "ZIP": first_present(record, "zipCode"),
+                "City": first_present(record, "city"),
+                "State": first_present(record, "state"),
+                "Listing ID": first_present(record, "id"),
+            }
+        )
+
+    return pd.DataFrame(
+        rows,
+        columns=[
+            "Address",
+            value_label,
+            "Beds",
+            "Baths",
+            "Sq Ft",
+            "$/Sq Ft",
+            "Lot Size",
+            "Days on Market",
+            "Status",
+            "Listed Date",
+            "Last Seen",
+            "ZIP",
+            "City",
+            "State",
+            "Listing ID",
+        ],
+    )
+
+
+def year_value_dict_to_dataframe(
+    year_values: Optional[Dict[str, Dict[str, Any]]],
+    *,
+    primary_label: str,
+    extra_labels: Optional[Dict[str, str]] = None,
+) -> pd.DataFrame:
+    rows: List[Dict[str, Any]] = []
+    extra_labels = extra_labels or {}
+
+    for year in sorted((year_values or {}).keys(), reverse=True):
+        payload = year_values.get(year) or {}
+        row = {
+            "Year": payload.get("year", year),
+            primary_label: payload.get("value") if primary_label == "Assessed Value" else payload.get("total"),
+        }
+        for source_key, label in extra_labels.items():
+            row[label] = payload.get(source_key)
+        rows.append(row)
+
+    columns = ["Year", primary_label] + list(extra_labels.values())
+    return pd.DataFrame(rows, columns=columns)
+
+
+def select_property_type_snapshot(
+    rows: Optional[List[Dict[str, Any]]],
+    property_type: str = DEFAULT_PROPERTY_TYPE,
+) -> Optional[Dict[str, Any]]:
+    for row in rows or []:
+        if str(row.get("propertyType", "")).lower() == property_type.lower():
+            return row
+    return None
+
+
+def market_history_to_dataframe(
+    history: Optional[Dict[str, Dict[str, Any]]],
+    *,
+    mode: str,
+    property_type: str = DEFAULT_PROPERTY_TYPE,
+) -> pd.DataFrame:
+    if mode not in {"sale", "rental"}:
+        raise RuntimeError("mode must be 'sale' or 'rental'.")
+
+    rows: List[Dict[str, Any]] = []
+    for month in sorted((history or {}).keys()):
+        snapshot = (history or {}).get(month) or {}
+        property_type_snapshot = select_property_type_snapshot(
+            snapshot.get("dataByPropertyType"),
+            property_type=property_type,
+        )
+        row_source = property_type_snapshot or snapshot
+
+        row = {
+            "Month": month,
+            "Median Days on Market": row_source.get("medianDaysOnMarket"),
+            "New Listings": row_source.get("newListings"),
+            "Total Listings": row_source.get("totalListings"),
+        }
+
+        if mode == "sale":
+            row["Median Price"] = row_source.get("medianPrice")
+            row["Average Price"] = row_source.get("averagePrice")
+            row["Median $/Sq Ft"] = row_source.get("medianPricePerSquareFoot")
+        else:
+            row["Median Rent"] = row_source.get("medianRent")
+            row["Average Rent"] = row_source.get("averageRent")
+            row["Median Rent/Sq Ft"] = row_source.get("medianRentPerSquareFoot")
+
+        rows.append(row)
+
+    return pd.DataFrame(rows)
 
 
 def extract_fields(listing: Dict[str, Any], prop: Optional[Dict[str, Any]]) -> Dict[str, Any]:
