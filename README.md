@@ -1,62 +1,46 @@
-# RentCast Rental Comps Extractor
+# RentCast Comp Intelligence
 
-## Summary
-This project is a Flask web app that lets users query RentCast long‑term rental listings by ZIP code, bedrooms, bathrooms, and property type. Results are pulled directly from RentCast and exported as CSV from the full MLS payload.
+AI-powered real estate comp engine built on the RentCast API — auto-pulls rental estimates, property valuations, and 12-month SFH sales history by zip code, cutting manual property research from hours to seconds with one-click CSV export.
 
-## What It Can Do
-- Pull active long‑term rental listings for selected ZIP codes and beds/baths, for **Single Family** only.
-- Return full RentCast listing payload fields and preview them in the web UI.
-- Generate sales output from `/properties` for the last N days and output in:
-  - Bedrooms, Bathrooms, Square Footage, Address, Sale Price
-- Generate active rental listing output (also in the same 5-column format).
-- Allow CSV export of the query output for underwriting and market review.
-- Provide a lightweight web interface with employer-ready access controls.
+## What It Does
 
-## Output (CSV Fields)
-Every export is currently normalized to:
-- Bedrooms
-- Bathrooms
-- Square Footage
-- Address
-- Sale Price
+- Query active long-term rental listings by ZIP code, beds, baths, and property type
+- Pull rental estimates, AVM valuations, and market stats for any zip code
+- Generate 12-month SFH sales history with full property details
+- Export any dataset to CSV/XLSX instantly
+- Password-protected web UI with HTTP basic auth for team access
 
-## Cost & API Usage
-This script consumes RentCast API calls; total cost depends on your plan.
+## Output Fields
 
-**Approximate calls per run (current setup):**
-- Listing calls depend on selected ZIPs, property types, filters, and pagination.
+Every export is normalized to:
 
-**Fill in pricing:**
-- Cost per call: ______
-- Estimated cost per run: ______
-- Estimated monthly cost: ______
+| Field | Description |
+|---|---|
+| Bedrooms | Bedroom count |
+| Bathrooms | Bathroom count |
+| Square Footage | Interior sq ft |
+| Address | Full street address |
+| Sale / Rent Price | Transaction or listing price |
 
-Call volume scales with number of ZIPs, property types, filters, and pagination.
+## Quick Start
+
+1. Copy `.env.example` → `.env` and add your `RENTCAST_API_KEY`
+2. Install dependencies: `pip install -r requirements.txt`
+3. Run: `python app.py`
+4. Open `http://localhost:8080`
+
+Set `APP_USERNAME` and `APP_PASSWORD` in `.env` to enable basic auth.
 
 ## Deploy on Render
 
-1. Commit and push your project to GitHub.
-2. In Render, click **New +** → **Web Service** → **Build and deploy from a Git repository**.
-3. Select your repo.
-4. Render will detect the service type from `render.yaml` automatically.
-5. Add environment variables:
-   - `RENTCAST_API_KEY`: your RentCast API key
-   - `APP_USERNAME`: optional app login username
-   - `APP_PASSWORD`: optional app login password
-6. Deploy.
+1. Push repo to GitHub
+2. In Render: **New +** → **Web Service** → connect repo
+3. Render auto-detects config from `render.yaml`
+4. Add environment variables:
+   - `RENTCAST_API_KEY` — your RentCast API key
+   - `APP_USERNAME` / `APP_PASSWORD` — optional basic auth
+5. Deploy
 
-Notes:
-- Render uses `PORT=10000`; if `PORT` is missing, app defaults to `10000`.
-- The app writes CSVs to `output/` at runtime and serves them for download.
-- If CSV download is not working, ensure `output/` exists in the container (it is created at run-time by the app code).
+## API Cost
 
-## Quick local run
-
-1. Create `.env` from `.env.example` and add your keys.
-2. Install dependencies:
-   - `pip install -r requirements.txt`
-3. Start app:
-   - `python app.py`
-4. Open `http://localhost:8080`.
-
-If you set `APP_USERNAME` and `APP_PASSWORD`, you'll be prompted for HTTP basic authentication.
+Calls scale with the number of ZIPs, property types, and pagination depth. Check your [RentCast plan](https://rentcast.io) for per-call pricing.
